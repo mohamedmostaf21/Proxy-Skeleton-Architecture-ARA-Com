@@ -17,10 +17,7 @@ namespace ara
                 /// @brief IPv4 address octets
                 std::array<uint8_t, 4> Octets;
 
-                Ipv4Address() : Ipv4Address(Octets[0],Octets[1],Octets[2],Octets[3]) 
-                {
-                    
-                }
+                Ipv4Address() = delete;
 
                 /// @brief Constructor
                 /// @param octet0 IPv4 first octet

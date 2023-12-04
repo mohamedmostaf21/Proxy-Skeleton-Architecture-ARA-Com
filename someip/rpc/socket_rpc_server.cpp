@@ -19,7 +19,7 @@ namespace ara
                     std::string ipAddress,
                     uint16_t port,
                     uint8_t protocolVersion,
-                    uint8_t interfaceVersion) : RpcServer(protocolVersion, interfaceVersion),
+                    uint8_t interfaceVersion) : RpcsResponser(protocolVersion, interfaceVersion),
                                                 mPoller{poller},
                                                 mServer{AsyncBsdSocketLib::TcpListener(ipAddress, port)}
                 {
@@ -39,7 +39,7 @@ namespace ara
 
 
 
-                /**************************** backend functions  **********************************/
+                /**************************** poller functions  **********************************/
 
                 void SocketRpcServer::onAccept()
                 {
@@ -93,13 +93,11 @@ namespace ara
  
                         // define vector that will be filled with result of method that i provide
                         std::vector<uint8_t> _responsePayload;
-                        
-                        
+                         
                         // Try to invoke corresponding request handler at a message reception
                         bool _handled{TryInvokeHandler(cRequestPayload, _responsePayload)};
                         if (_handled)
                         {
-
                             // put vector that holds the result of method that i provide
                             mSendingQueue.TryEnqueue(std::move(_responsePayload));
                         }

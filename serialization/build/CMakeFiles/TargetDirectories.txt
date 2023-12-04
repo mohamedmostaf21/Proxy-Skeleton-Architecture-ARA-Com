@@ -1,0 +1,4 @@
+/home/mido/from-windows/araCom/SOMEIP-and-SOMEIP-SD/serialization/build/CMakeFiles/serilization.dir
+/home/mido/from-windows/araCom/SOMEIP-and-SOMEIP-SD/serialization/build/CMakeFiles/test.dir
+/home/mido/from-windows/araCom/SOMEIP-and-SOMEIP-SD/serialization/build/CMakeFiles/edit_cache.dir
+/home/mido/from-windows/araCom/SOMEIP-and-SOMEIP-SD/serialization/build/CMakeFiles/rebuild_cache.dir

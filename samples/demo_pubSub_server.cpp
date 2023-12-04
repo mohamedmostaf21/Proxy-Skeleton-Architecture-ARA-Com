@@ -1,58 +1,82 @@
 #include <iostream>
 
-#include "../someip/pubsub/someip_pubsub_server.h"
-#include "../someip/pubsub/socket_pubSub.h"
+#include "../someip/pubsub/socket_pubSub_server.h"
 #include "../helper/ipv4_address.h"
-#include "../asyncbsdsocket/include/poller.h"
+#include "../sockets/include/poller.h"
+#include "../helper/machine_state.h"
+
+// for delay
+#include <thread>
+#include <chrono>
 
 using namespace ara::com::someip::pubsub;
 using namespace ara::com::someip::sd;
 using namespace ara::com::helper;
 using namespace AsyncBsdSocketLib;
 
+/************************************ constants ******************************/
 
 const std::string cAnyIpAddress{"0.0.0.0"};
 const std::string cNicIpAddress{"127.0.0.1"};
 const std::string cMulticastGroup{"239.0.0.1"};
 const uint16_t cPort{5555};
 
+const int cTimeoutMs = 1;
+
+uint16_t cServiceId = 4500;
+uint16_t cInstanceId = 1000;
+uint16_t cEventgroupId = 2000;
+uint8_t cMajorVersion = 12;
+
 int main()
 {
-    Poller* poller;
-    poller = new Poller();
-    
-    /*
-    SockeKPubSub(
-            AsyncBsdSocketLib::Poller *poller,
-            std::string nicIpAddress,
-            std::string multicastGroup,
-            uint16_t port);
-    */
+  Poller* poller;
+  poller = new Poller();
+  
+  SockeKPubSubServer server(cServiceId,
+                            cInstanceId,
+                            cMajorVersion,
+                            cEventgroupId,
+                            poller,
+                            cNicIpAddress,
+                            cMulticastGroup,
+                            cPort);
 
-    SockeKPubSub* sock;
-    sock = new SockeKPubSub(poller,cNicIpAddress,cMulticastGroup,cPort);
+  server.Start();
 
+  
 
-    /*
-    SomeIpPubSubServer(
-                        helper::NetworkLayer<sd::SomeIpSdMessage> *networkLayer,
-                        uint16_t serviceId,
-                        uint16_t instanceId,
-                        uint8_t majorVersion,
-                        uint16_t eventgroupId,
-                        helper::Ipv4Address ipAddress,
-                        uint16_t port);
-    */
-    Ipv4Address addr(cMulticastGroup);
-    
-    SomeIpPubSubServer server(sock,4369,1234,12,1234,addr,cPort);
-    
-    server.Start();
+  // Create thread using a lambda expression
+  std::thread t1([poller]()
+  {
+    while(1)
+    {
+      poller->TryPoll(cTimeoutMs);
+    }
+  });
 
-   const int cTimeoutMs = 1;
-   while(1)
-   {
-       poller->TryPoll(cTimeoutMs);
-   }
-   return 0;
+  int counter = false;
+  while(1)
+  {    
+    if(server.GetState() == PubSubState::Subscribed && counter == false)
+    {
+      // Introduce a delay of 7 seconds
+      std::this_thread::sleep_for(std::chrono::seconds(7));
+      std::cout << "---preparing sample1 to send---\n";
+      server.update();
+
+      // Introduce a delay of 7 seconds
+      std::this_thread::sleep_for(std::chrono::seconds(7));
+      std::cout << "\n---preparing sample2 to send---\n";
+      server.update();
+
+      counter = true;
+    } 
+  }
+
+   // Join the thread with the main thread
+  t1.join();
+
+  delete poller;
+  return 0;
 }

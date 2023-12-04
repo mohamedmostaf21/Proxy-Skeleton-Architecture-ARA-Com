@@ -1,10 +1,10 @@
 #ifndef SOCKET_RPC_CLIENT_H
 #define SOCKET_RPC_CLIENT_H
 
-#include "../../asyncbsdsocket/include/poller.h"
-#include "../../asyncbsdsocket/include/tcp_client.h"
+#include "../../sockets/include/poller.h"
+#include "../../sockets/include/tcp_client.h"
 #include "../../helper/concurrent_queue.h"
-#include "./rpc_client.h"
+#include "rpcs_requester.h"
 
 namespace ara
 {
@@ -15,10 +15,10 @@ namespace ara
             namespace rpc
             {
                 /// @brief TCP socket-based RPC client
-                class SocketRpcClient : public RpcClient
+                class SocketRpcClient : public RpcsRequester
                 {
                 private:
-                    /******************************* attributes  *************************************/
+                    /*********************** poller attributes  *******************/
 
                     static const size_t cBufferSize{256};
                     helper::ConcurrentQueue<std::vector<uint8_t>> mSendingQueue;
@@ -27,18 +27,21 @@ namespace ara
 
 
 
-                    /**************************** backend functions  **********************************/
+                    /********************** poller functions  *********************/
 
                     void onSend();
                     void onReceive();
 
-                protected:
-                    /**************************** useful in Send  *************************************/
 
-                    void Send(const std::vector<uint8_t> &payload) override;
+
+                    /******************** function that parent need *****************/
+
+                    virtual void Send(const std::vector<uint8_t> &payload) override;
+
+
 
                 public:
-                    /**************************** constructor  ****************************************/
+                    /******************* constructor  *******************************/
 
                     /// @brief Constructor
                     /// @param poller BSD sockets poller
@@ -54,6 +57,9 @@ namespace ara
                         uint8_t protocolVersion,
                         uint8_t interfaceVersion = 1);
 
+
+
+                    /**************** override deconstructor  *********************/
 
                     virtual ~SocketRpcClient() override;
                 };

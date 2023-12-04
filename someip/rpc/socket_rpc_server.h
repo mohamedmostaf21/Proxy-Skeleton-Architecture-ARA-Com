@@ -1,9 +1,9 @@
 #ifndef SOCKET_RPC_SERVER_H
 #define SOCKET_RPC_SERVER_H
 
-#include "../../asyncbsdsocket/include/poller.h"
+#include "../../sockets/include/poller.h"
 #include "../../helper/concurrent_queue.h"
-#include "./rpc_server.h"
+#include "rpcs_responser.h"
 
 namespace ara
 {
@@ -14,27 +14,26 @@ namespace ara
             namespace rpc
             {
                 /// @brief TCP socket-based RPC server
-                class SocketRpcServer : public RpcServer
+                class SocketRpcServer : public RpcsResponser
                 {
                 private:
-                    /******************************* attributes  *************************************/
+                    /*********************** poller attributes  *******************/
 
                     static const size_t cBufferSize{256};
-
                     helper::ConcurrentQueue<std::vector<uint8_t>> mSendingQueue;
                     AsyncBsdSocketLib::Poller *const mPoller;
                     AsyncBsdSocketLib::TcpListener mServer;
 
 
 
-                    /**************************** backend functions  **********************************/
+                    /********************** poller functions  *********************/
 
                     void onAccept();
                     void onReceive();
                     void onSend();
 
                 public:
-                    /**************************** constructor  ****************************************/
+                    /******************* constructor  *******************************/
 
                     /// @brief Constructor
                     /// @param poller BSD sockets poller
@@ -52,7 +51,7 @@ namespace ara
 
 
 
-                    /**************************** override deconstructor inherited from parent *********/
+                    /**************** override deconstructor  *********************/
 
                     virtual ~SocketRpcServer() override;
                 };

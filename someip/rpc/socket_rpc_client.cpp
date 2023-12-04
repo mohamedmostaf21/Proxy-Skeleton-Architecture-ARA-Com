@@ -19,7 +19,7 @@ namespace ara
                     std::string ipAddress,
                     uint16_t port,
                     uint8_t protocolVersion,
-                    uint8_t interfaceVersion) : RpcClient(protocolVersion, interfaceVersion),
+                    uint8_t interfaceVersion) : RpcsRequester(protocolVersion, interfaceVersion),
                                                 mPoller{poller},
                                                 mClient{AsyncBsdSocketLib::TcpClient(ipAddress, port)}
                 {
@@ -52,14 +52,12 @@ namespace ara
 
 
 
-
-
+                /************************** poller functions  ************************/
 
                 void SocketRpcClient::onSend()
                 {
                     while (!mSendingQueue.Empty())
                     {
-                        std::cout << "in while onSend\n";
                         std::vector<uint8_t> _payload;
                         bool _dequeued{mSendingQueue.TryDequeue(_payload)};
                         if (_dequeued)
@@ -77,23 +75,35 @@ namespace ara
 
                 void SocketRpcClient::onReceive()
                 {
+                    // define array to receive serialized SOMEIP message
                     std::array<uint8_t, cBufferSize> _buffer;
+                    
+                    // receive serialized SOMEIP message in form of array not vector
                     ssize_t _receivedSize{mClient.Receive(_buffer)};
-
                     if (_receivedSize > 0)
                     {
+                        // convert serialized SOMEIP message from array into vector
                         const std::vector<uint8_t> cPayload(
                             std::make_move_iterator(_buffer.begin()),
                             std::make_move_iterator(_buffer.begin() + _receivedSize));
 
+                        // call function that contain what to do with received message
                         InvokeHandler(cPayload);
                     }
                 }
+
+                
+                
+                /******************** function that parent need *****************/
 
                 void SocketRpcClient::Send(const std::vector<uint8_t> &payload)
                 {
                     mSendingQueue.TryEnqueue(payload);
                 }
+
+
+
+                /**************************** override deconstructor  ************************/
 
                 SocketRpcClient::~SocketRpcClient()
                 {
