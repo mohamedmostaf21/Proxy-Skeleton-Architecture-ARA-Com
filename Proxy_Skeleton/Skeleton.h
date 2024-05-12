@@ -24,16 +24,19 @@ namespace ara
                     update
                     getState
                     */
+/*
+                    void StopUpdateSessionImp() override
+                    {
+                        std::cout << "activate from skeleton\n";
+                    }
+                    */
 
 
                     /******** disable copy constructor and equal assigment operator *****/
-      
                     Skelton(const Skelton &other) = delete;
                     Skelton & operator=(const Skelton &other) = delete;
                     
-      
                     /********************* deconstructor *******************/
-
                     ~Skelton();
             };
             

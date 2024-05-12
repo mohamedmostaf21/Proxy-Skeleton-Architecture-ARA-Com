@@ -1,10 +1,10 @@
-#include "Proxy.h"
+#include "RPCSProxy.h"
 
 static const std::string c_AnyIpAddress{"0.0.0.0"};
 static const std::string c_NicIpAddress{"127.0.0.1"};
 static const std::string c_MulticastGroup{"239.0.0.1"};
 static const uint16_t c_ServiceDiscoveryFindingPort{6666};
-static const uint16_t c_ServiceId = 10;
+static const uint16_t c_ServiceId = 1;
 static const uint8_t c_MajorVersion = 10;
 static const uint8_t c_MinorVersion = 4;
 static const uint16_t c_EventgroupId = 5;
@@ -20,37 +20,36 @@ namespace ara
     {
         namespace proxy
         {    
-            /******************** constructors ************************/
-        
-            Proxy::HandleType::HandleType(InstanceIdentifier id,int16_t p): identifier{id},
+            /******************** constructors ************************/   
+            RPCSProxy::HandleType::HandleType(InstanceIdentifier id,int16_t p): identifier{id},
                                                                     port_no{p}
             {}
 
 
             /************ setters and getters *************************/
 
-            void Proxy::HandleType::setId(InstanceIdentifier id)
+            void RPCSProxy::HandleType::setId(InstanceIdentifier id)
             {   identifier=id;  }
 
-            void Proxy::HandleType::setPort(int16_t p)
+            void RPCSProxy::HandleType::setPort(int16_t p)
             {   port_no=p;  }
 
-            int16_t Proxy::HandleType::getPort()const
+            int16_t RPCSProxy::HandleType::getPort()const
             {   return port_no; }
 
-            const InstanceIdentifier& Proxy::HandleType::GetInstanceId()const
+            const InstanceIdentifier& RPCSProxy::HandleType::GetInstanceId()const
             {   return identifier;  }
 
-            void Proxy::HandleType::setRequester(Requester *r)
+            void RPCSProxy::HandleType::setRequester(RPCSServiceRequester *r)
             {   requester = r;  }
 
-            Requester* Proxy::HandleType::getRequester()
+            RPCSServiceRequester* RPCSProxy::HandleType::getRequester()
             { return requester; }    
 
-            ServiceHandleContainer<Proxy::HandleType> Proxy::findSerivce(InstanceIdentifier id)
+            ServiceHandleContainer<RPCSProxy::HandleType> RPCSProxy::findSerivce(InstanceIdentifier id)
             {
-                Requester *requester;
-                requester = new Requester(c_ServiceId,
+                RPCSServiceRequester *requester;
+                requester = new RPCSServiceRequester(c_ServiceId,
                                         id.getInstanceId(),
                                         c_MajorVersion,
                                         c_MinorVersion,
@@ -100,84 +99,52 @@ namespace ara
             }
 
             /************************* constructor **************************/
-
-            Proxy::Proxy (HandleType &handle)
+            RPCSProxy::RPCSProxy (HandleType &handle)
             {
                 requester = handle.getRequester();
             }
 
 
             /************************ fundemental funtions *******************/
-            
-#if(EXAMPLE == PUBSUB)
-            void Proxy::subscribe(size_t maxSampleCount)
-            {
-                requester->eventClient->Subscribe(maxSampleCount);
-            }
-            
-            helper::SubscriptionState Proxy::GetSubscriptionState() const
-            {
-                return requester->eventClient->GetSubscriptionState();
-            }
-            
-            std::future<bool> Proxy::getter(std::vector<uint8_t> &data)
-            {
-                return requester->eventClient->getter(data);
-            }
-
-            void Proxy::printSubscriptionState()
-            {
-                requester->eventClient->printCurrentState();
-            }
-
-#elif(EXAMPLE == RPCS)
-            std::future<bool> Proxy::calculateSum(const std::vector<uint8_t> &payload,
-                            std::vector<uint8_t> &data)
-            {
-                return requester->calculateSum(payload,data);
-            }
-
-            std::future<bool> Proxy::RequestUpdateSession(std::vector<uint8_t> &data)
+            std::future<bool> RPCSProxy::RequestUpdateSession(std::vector<uint8_t> &data)
             {
                 std::vector<uint8_t> payload;
                 return requester->RequestUpdateSession(payload,data);
             }
 
 
-            std::future<bool> Proxy::PrepareUpdate(const std::vector<uint8_t> &payload,
+            std::future<bool> RPCSProxy::PrepareUpdate(const std::vector<uint8_t> &payload,
                             std::vector<uint8_t> &data)
             {
                 return requester->PrepareUpdate(payload,data);
             }
 
-            std::future<bool> Proxy::VerifyUpdate(const std::vector<uint8_t> &payload,
+            std::future<bool> RPCSProxy::VerifyUpdate(const std::vector<uint8_t> &payload,
                             std::vector<uint8_t> &data)
             {
                 return requester->VerifyUpdate(payload,data);
             }
             
-            std::future<bool> Proxy::PrepareRollback(const std::vector<uint8_t> &payload,
+            std::future<bool> RPCSProxy::PrepareRollback(const std::vector<uint8_t> &payload,
                             std::vector<uint8_t> &data)
             {
                 return requester->PrepareRollback(payload,data);
             }
            
 
-            void Proxy::StopUpdateSession()
+            void RPCSProxy::StopUpdateSession()
             {
                 requester->StopUpdateSession();
             }
 
-            void Proxy::ResetMachine()
+            void RPCSProxy::ResetMachine()
             {
                 requester->ResetMachine();
             }
-#endif
 
 
             /********************* deconstructor *******************/
-            
-            Proxy::~Proxy()
+            RPCSProxy::~RPCSProxy()
             {
                     delete requester;
             }
