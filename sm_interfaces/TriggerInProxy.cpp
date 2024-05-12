@@ -152,7 +152,7 @@ namespace ara
             
             TriggerInProxy::~TriggerInProxy()
             {
-
+                    delete requester;
             }
         }
     }

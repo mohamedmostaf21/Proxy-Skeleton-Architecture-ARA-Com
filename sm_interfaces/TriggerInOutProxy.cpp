@@ -144,7 +144,7 @@ namespace ara
                 
                 TriggerInOutProxy::~TriggerInOutProxy()
                 {
-
+                    delete requester;
                 }
         }
     }

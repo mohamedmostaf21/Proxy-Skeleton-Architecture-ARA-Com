@@ -47,7 +47,7 @@ int main()
         });
 
 #if(EXAMPLE == RPCS)
-
+/*
     std::cout << "--------------------------- before calling getSum------------------\n";
     std::vector<uint8_t> input = {4, 2, 13, 4, 45};
 
@@ -63,6 +63,45 @@ int main()
         }
         std::cout << "\n";
     }
+*/
+
+
+
+/** part 1 **/
+/*
+    std::vector<uint8_t> output3;
+    std::future<bool> futureObj3 = myProxy.RequestUpdateSession(output3);
+
+    if(futureObj3.get())
+    {
+        std::cout << "result of RequestUpdateSession : ";
+        for (uint8_t val : output3) {
+          std::cout << static_cast<int>(val) ;
+        }
+        std::cout << "\n";
+    }
+*/
+
+/** part 2 **/
+
+    std::vector<uint8_t> input = {4, 2, 13, 4, 45};
+
+    std::vector<uint8_t> output3;
+
+    std::future<bool> futureObj3 = myProxy.PrepareRollback(input,output3);
+
+    if(futureObj3.get())
+    {
+        std::cout << "result of PrepareRollback : ";
+        for (uint8_t val : output3) {
+          std::cout << static_cast<int>(val) ;
+        }
+        std::cout << "\n";
+    }
+
+/** part 3 **/
+    // myProxy.StopUpdateSession();
+    // myProxy.ResetMachine();
 
 #elif(EXAMPLE == PUBSUB)    
         std::cout << "\n\n\n----------------------- requesting subscribe ----------------------\n";
