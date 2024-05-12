@@ -138,7 +138,7 @@ namespace ara
                 
                 CAM_Control_Proxy::~CAM_Control_Proxy()
                 {
-
+                    delete requester;
                 }
         }
     }

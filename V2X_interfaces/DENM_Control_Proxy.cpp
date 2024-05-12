@@ -138,7 +138,7 @@ namespace ara
                 
                 DENM_Control_Proxy::~DENM_Control_Proxy()
                 {
-
+                    delete requester;
                 }
         }
     }

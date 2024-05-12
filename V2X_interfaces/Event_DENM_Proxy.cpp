@@ -139,7 +139,7 @@ namespace ara
                 
                 Event_DENM_Proxy::~Event_DENM_Proxy()
                 {
-
+                    delete requester;
                 }
         }
     }

@@ -116,6 +116,17 @@ add_library(
    someip/service/field_Only/field_service_requester.h
    someip/service/field_Only/field_service_requester.cpp
 
+   ## service which is an rpcs only ##
+   someip/service/rpcs_Only/rpcs_service_provider.h
+   someip/service/rpcs_Only/rpcs_service_provider.cpp
+   someip/service/rpcs_Only/rpcs_service_requester.h
+   someip/service/rpcs_Only/rpcs_service_requester.cpp
+   
+   someip/service/rpcs_Only/ucm_rpcs_service_provider.h
+   someip/service/rpcs_Only/ucm_rpcs_service_provider.cpp
+   someip/service/rpcs_Only/ucm_master_rpcs_service_requester.h
+   someip/service/rpcs_Only/ucm_master_rpcs_service_requester.cpp
+
    ## config ##
    config.h
 
@@ -177,6 +188,38 @@ add_library(
    V2X_interfaces/Event_DENM_Proxy.cpp
    V2X_interfaces/Event_DENM_Skeleton.h
    V2X_interfaces/Event_DENM_Skeleton.cpp
+
+   ## rpcs_interfaces ##
+   rpcs_interfaces/RPCSProxy.h
+   rpcs_interfaces/RPCSProxy.cpp
+   rpcs_interfaces/RPCSSkeleton.h
+   rpcs_interfaces/RPCSSkeleton.cpp
+
+   ## ucm_interfaces ##
+   ucm_interfaces/ucmMaster_ucm_proxy.h
+   ucm_interfaces/ucmMaster_ucm_proxy.cpp
+   ucm_interfaces/ucmMaster_ucm_skeleton.h
+   ucm_interfaces/ucmMaster_ucm_skeleton.cpp
+
+   ucm_interfaces/PackageManagementProxy.h
+   ucm_interfaces/PackageManagementProxy.cpp
+   ucm_interfaces/PackageManagementSkeleton.h
+   ucm_interfaces/PackageManagementSkeleton.cpp
+
+   ucm_interfaces/TransferStateProxy.h
+   ucm_interfaces/TransferStateProxy.cpp
+   ucm_interfaces/TransferStateSkeleton.h
+   ucm_interfaces/TransferStateSkeleton.cpp
+
+   ucm_interfaces/CampaignStateProxy.h
+   ucm_interfaces/CampaignStateProxy.cpp
+   ucm_interfaces/CampaignStateSkeleton.h
+   ucm_interfaces/CampaignStateSkeleton.cpp
+
+   ucm_interfaces/SwNameVersionProxy.h
+   ucm_interfaces/SwNameVersionProxy.cpp
+   ucm_interfaces/SwNameVersionSkeleton.h
+   ucm_interfaces/SwNameVersionSkeleton.cpp
 )
 
 ################################################################################
@@ -280,3 +323,28 @@ target_link_libraries(DENM_Server araCom)
 #### executables for DENM_VDP_Client ####
 add_executable(DENM_Client V2X_interfaces_demos/demo_DENM_Client.cpp)
 target_link_libraries(DENM_Client araCom)
+
+
+#####################################################################################
+##                             RPCS service excutables                             ##
+#####################################################################################
+
+#### executables for proxy ####
+add_executable(rpcs_proxy rpcs_interfaces_demos/rpcs_proxy.cpp)
+target_link_libraries(rpcs_proxy araCom)
+
+#### executables for skeleton ####
+add_executable(rpcs_skeleton rpcs_interfaces_demos/rpcs_skeleton.cpp)
+target_link_libraries(rpcs_skeleton araCom)
+
+#####################################################################################
+##                                  ucm excutables                                 ##
+#####################################################################################
+
+#### executables for proxy ####
+add_executable(demo_ucm_proxy ucm_interfaces_demos/demo_ucm_proxy.cpp)
+target_link_libraries(demo_ucm_proxy araCom)
+
+#### executables for skeleton ####
+add_executable(demo_ucm_master_skeleton ucm_interfaces_demos/demo_ucm_master_skeleton.cpp)
+target_link_libraries(demo_ucm_master_skeleton araCom)

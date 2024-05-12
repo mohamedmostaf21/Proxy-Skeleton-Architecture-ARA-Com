@@ -139,7 +139,7 @@ namespace ara
                 
                 CAM_VDP_Proxy::~CAM_VDP_Proxy()
                 {
-
+                    delete requester;
                 }
         }
     }

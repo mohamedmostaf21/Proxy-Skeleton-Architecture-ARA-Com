@@ -139,7 +139,7 @@ namespace ara
                 
                 DENM_VDP_Proxy::~DENM_VDP_Proxy()
                 {
-
+                    delete requester;
                 }
         }
     }

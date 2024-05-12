@@ -139,7 +139,7 @@ namespace ara
                 
                 POTI_Management_Proxy::~POTI_Management_Proxy()
                 {
-
+                    delete requester;
                 }
         }
     }

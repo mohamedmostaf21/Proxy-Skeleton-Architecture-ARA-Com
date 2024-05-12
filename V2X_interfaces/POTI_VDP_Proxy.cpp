@@ -139,7 +139,7 @@ namespace ara
                 
                 POTI_VDP_Proxy::~POTI_VDP_Proxy()
                 {
-
+                    delete requester;
                 }
         }
     }
