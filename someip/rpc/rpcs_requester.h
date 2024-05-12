@@ -100,6 +100,12 @@ namespace ara
                         uint16_t clientId,
                         const std::vector<uint8_t> &rpcPayload);
 
+                    void RequestWithoutResponse(
+                        uint16_t serviceId,
+                        uint16_t methodId,
+                        uint16_t clientId,
+                        const std::vector<uint8_t> &rpcPayload);
+
                     
                     std::future<bool> RequestWithoutHandler(
                     uint16_t serviceId,

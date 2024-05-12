@@ -1,5 +1,4 @@
-#include "provider.h"
-
+#include "rpcs_service_provider.h"
 
 namespace ara
 {
@@ -9,76 +8,23 @@ namespace ara
         {
             namespace sd
             {
-                /*************************** methods that i provide ***************************/
+                /******************************* constants **********************************/
+                using HandlerTypeFunc = std::function<bool(const std::vector<uint8_t> &, std::vector<uint8_t> &)>;
+                const uint16_t cSumationOverVectorMethodId = 1000;
+                const uint16_t cMultiplicationOverVectorMethodID = 2000;
+                const uint16_t cGetSumMethodID = 3000;
 
-#if(EXAMPLE == RPCS)
-                uint8_t summationOverVectorImp(const std::vector<uint8_t> &list)
-                {
-                    uint8_t sum = 0;
-                    for (int i = 0; i < list.size(); i++) {
-                            sum += list[i];
-                    }
-                    return sum;
-                }
+                const uint16_t  cRequestUpdateSessionMethodID  = 4001;
+      
+                const uint16_t  cPrepareUpdateMethodID  = 4002;
+                const uint16_t  cVerifyUpdateMethodID  = 4003;
+                const uint16_t  cPrepareRollbackMethodID  = 4004;
 
-                bool summationOverVector(const std::vector<uint8_t> &input, std::vector<uint8_t> &output) 
-                {
-                    std::cout << "\nsummationOverVector is called\n";
+                const uint16_t cStopUpdateSessionMethodID = 4005;
+                const uint16_t cResetMachineMethodID = 4006; 
 
-                    uint8_t funcResult = summationOverVectorImp(input);
-
-                    output.push_back(funcResult); // Put the sum in the output vector
-
-                    return true;
-                }
-
-                uint8_t multiplicationOverVectorImp(const std::vector<uint8_t> &list)
-                {
-                    int sum = 1;
-                    for (int i = 0; i < list.size(); i++) {
-                        sum *= list[i];
-                    }
-                    return sum;
-                }
-
-                bool multiplicationOverVector(const std::vector<uint8_t> &input, std::vector<uint8_t> &output) 
-                {
-                    std::cout << "\nmultiplicationOverVector is called\n";
-
-                    uint8_t funcResult = multiplicationOverVectorImp(input);
-
-                    output.push_back(funcResult); // Put the sum in the output vector
-
-                    return true;
-                }
-
-                uint8_t getSumImp(const std::vector<uint8_t> &list)
-                {
-                    uint8_t sum = 0;
-                    for (int i = 0; i < list.size(); i++) {
-                        sum += list[i];
-                    }
-
-                    return sum;
-                }
-
-                bool getSum(const std::vector<uint8_t> &input, std::vector<uint8_t> &output) 
-                {
-                    std::cout << "\ngetSum is called\n";
-
-                    uint8_t funcResult = getSumImp(input);
-
-                    output.push_back(funcResult); // Put the sum in the output vector
-
-                    return true;
-                }
-
-                
-#endif
-              
                 /******************************* constructors  ******************************/
-
-                Provider::Provider(
+                RPCSServiceProvider::RPCSServiceProvider(
                     uint16_t serviceId,
                     uint16_t instanceId,
                     uint8_t majorVersion,
@@ -89,7 +35,6 @@ namespace ara
                     std::string multicastGroup,
                     uint16_t port,
                     uint16_t endpointRpcsPort,
-                    uint16_t endpointEventPort,
                     uint8_t protocolVersion,
                     uint8_t interfaceVersion): mServiceId{serviceId},
                                             mInstanceId{instanceId},
@@ -103,7 +48,6 @@ namespace ara
                                             cMulticastGroup{multicastGroup},
                                             cPort{port},
                                             mEndpointRpcsPort{endpointRpcsPort},
-                                            mEndpointEventPort{endpointEventPort},
                                             mUdpSocket(cAnyIpAddress, port, nicIpAddress, multicastGroup)
                 {
                     bool _successful{mUdpSocket.TrySetup()};
@@ -112,14 +56,14 @@ namespace ara
                         throw std::runtime_error("UDP socket setup failed.");
                     }
 
-                    auto _receiver{std::bind(&Provider::onReceive, this)};
+                    auto _receiver{std::bind(&RPCSServiceProvider::onReceive, this)};
                     _successful = mPoller->TryAddReceiver(&mUdpSocket, _receiver);
                     if (!_successful)
                     {
                         throw std::runtime_error("Adding UDP socket receiver failed.");
                     }
 
-                    auto _sender{std::bind(&Provider::onSend, this)};
+                    auto _sender{std::bind(&RPCSServiceProvider::onSend, this)};
                     _successful = mPoller->TryAddSender(&mUdpSocket, _sender);
                     if (!_successful)
                     {
@@ -128,12 +72,9 @@ namespace ara
                 }
 
 
-
                 /******************************* fundemental functions *********************/
-    
-                void Provider::init()
+                void RPCSServiceProvider::init()
                 {
-#if(EXAMPLE == RPCS)
                     /********* initilization for rpcs ****************/
                     rpcServer = new rpc::SocketRpcServer( mPoller,
                                                          "127.0.0.1",
@@ -141,62 +82,28 @@ namespace ara
                                                           mProtocolVersion,
                                                           mInterfaceVersion);
 
-                    rpcServer->SetHandler( mServiceId,
-                                           cSumationOverVectorMethodId,
-                                           (HandlerTypeFunc)summationOverVector
-                                         );
-                
-                    rpcServer->SetHandler(mServiceId, cMultiplicationOverVectorMethodID, (HandlerTypeFunc)multiplicationOverVector);
 
-                    rpcServer->SetHandler(mServiceId, cGetSumMethodID, (HandlerTypeFunc)getSum);
+                    HandlerTypeFunc handler1 = std::bind(&RPCSServiceProvider::RequestUpdateSession, this, std::placeholders::_1, std::placeholders::_2);
+                    rpcServer->SetHandler(mServiceId, cRequestUpdateSessionMethodID, handler1);
 
+                    HandlerTypeFunc handler2 = std::bind(&RPCSServiceProvider::PrepareUpdate, this, std::placeholders::_1, std::placeholders::_2);
+                    rpcServer->SetHandler(mServiceId, cPrepareUpdateMethodID, handler2);
 
-
-        HandlerTypeFunc handler1 = std::bind(&Provider::RequestUpdateSession, this, std::placeholders::_1, std::placeholders::_2);
-        rpcServer->SetHandler(mServiceId, cRequestUpdateSessionMethodID, handler1);
-
-        HandlerTypeFunc handler2 = std::bind(&Provider::PrepareUpdate, this, std::placeholders::_1, std::placeholders::_2);
-        rpcServer->SetHandler(mServiceId, cPrepareUpdateMethodID, handler2);
-
-        HandlerTypeFunc handler3 = std::bind(&Provider::VerifyUpdate, this, std::placeholders::_1, std::placeholders::_2);
-        rpcServer->SetHandler(mServiceId, cVerifyUpdateMethodID, handler3);
-        
-        HandlerTypeFunc handler4 = std::bind(&Provider::PrepareRollback, this, std::placeholders::_1, std::placeholders::_2);
-        rpcServer->SetHandler(mServiceId, cPrepareRollbackMethodID, handler4);
-
-        HandlerTypeFunc handler5 = std::bind(&Provider::StopUpdateSession, this, std::placeholders::_1, std::placeholders::_2);
-        rpcServer->SetHandler(mServiceId, cStopUpdateSessionMethodID, handler5);
-
-        HandlerTypeFunc handler6 = std::bind(&Provider::ResetMachine, this, std::placeholders::_1, std::placeholders::_2);
-        rpcServer->SetHandler(mServiceId, cResetMachineMethodID, handler6);
-#elif(EXAMPLE == PUBSUB)
-                    /************** initialization for events ***************/            
+                    HandlerTypeFunc handler3 = std::bind(&RPCSServiceProvider::VerifyUpdate, this, std::placeholders::_1, std::placeholders::_2);
+                    rpcServer->SetHandler(mServiceId, cVerifyUpdateMethodID, handler3);
                     
-                    eventServer = new SockeKEventServer(mServiceId,
-                                            mInstanceId,
-                                            mMajorVersion,
-                                            mEventgroupId,
-                                            mPoller,
-                                            cNicIpAddress,
-                                            cMulticastGroup,
-                                            mEndpointEventPort,
-                                            mProtocolVersion);
-                    
-                    std::vector<uint8_t> currentValue = {47,48,49};
-                    bool _result = eventServer->putCurrentValue(currentValue);
-                    if(_result)
-                    {
-                        eventServer->Start();
-                    }
-                    else
-                    {
-                        std::cout << "fail to put current value\n";
-                    }
-#endif
+                    HandlerTypeFunc handler4 = std::bind(&RPCSServiceProvider::PrepareRollback, this, std::placeholders::_1, std::placeholders::_2);
+                    rpcServer->SetHandler(mServiceId, cPrepareRollbackMethodID, handler4);
+
+                    HandlerTypeFunc handler5 = std::bind(&RPCSServiceProvider::StopUpdateSession, this, std::placeholders::_1, std::placeholders::_2);
+                    rpcServer->SetHandler(mServiceId, cStopUpdateSessionMethodID, handler5);
+
+                    HandlerTypeFunc handler6 = std::bind(&RPCSServiceProvider::ResetMachine, this, std::placeholders::_1, std::placeholders::_2);
+                    rpcServer->SetHandler(mServiceId, cResetMachineMethodID, handler6);
                 }
 
 
-                void Provider::offerService()
+                void RPCSServiceProvider::offerService()
                 {                    
                     // make SOMEIP/SD message
                     SomeIpSdMessage mOfferServiceMessage;
@@ -223,17 +130,6 @@ namespace ara
                                                                           )
                     };
 
-/*
-                    helper::Ipv4Address mEndpointIp("239.0.0.1");
-
-                    // prepare endpoint option
-                    auto _offerEndpointOption
-                    {
-                        option::Ipv4EndpointOption::CreateMulticastEndpoint(
-                                false, mEndpointIp, mEndpointEventPort)
-                    };
-*/
-
                     // add created option to created entry 
                     _offerServiceEntry->AddFirstOption(std::move(_offerEndpointOption));
                     
@@ -245,7 +141,7 @@ namespace ara
                 }
 
 
-                void Provider::stopService()
+                void RPCSServiceProvider::stopService()
                 {
                      // make SOMEIP/SD message
                     SomeIpSdMessage mStofServiceMessage;
@@ -284,8 +180,7 @@ namespace ara
 
                 
                 /**************************** poller functions  **********************************/
-
-                void Provider::onReceive()
+                void RPCSServiceProvider::onReceive()
                 {
                     // define array to receive serialized SOMEIP/SD message
                     std::array<uint8_t, cBufferSize> _buffer;
@@ -309,7 +204,7 @@ namespace ara
                     }
                 }
 
-                void Provider::onSend()
+                void RPCSServiceProvider::onSend()
                 {
                     while (!mSendingQueue.Empty())
                     {
@@ -337,21 +232,78 @@ namespace ara
                 }
 
 
-                void Provider::Send(const SomeIpSdMessage &message)
+                void RPCSServiceProvider::Send(const SomeIpSdMessage &message)
                 {
                     std::vector<uint8_t> _payload{message.Payload()};
                     mSendingQueue.TryEnqueue(std::move(_payload));
                 }
 
 
-                AsyncBsdSocketLib::Poller* Provider::getPoller()
+                AsyncBsdSocketLib::Poller* RPCSServiceProvider::getPoller()
                 {
                     return mPoller;
                 }
 
-                /**************************** deconstructor  ************************/
 
-                Provider::~Provider()
+                /******************* functions *****************************/
+                bool RPCSServiceProvider::RequestUpdateSession(const std::vector<uint8_t> &input, std::vector<uint8_t> &output) 
+                {
+                    std::cout << "\nRequestUpdateSession is called\n";
+
+                    bool funcResult = RequestUpdateSessionImp();
+
+                    output.push_back(funcResult); // Put the sum in the output vector
+
+                    return true;
+                }
+
+                bool RPCSServiceProvider::PrepareUpdate(const std::vector<uint8_t> &input, std::vector<uint8_t> &output) 
+                {
+                    std::cout << "\nPrepareUpdate is called\n";
+
+                    bool funcResult = PrepareUpdateImp(input);
+
+                    output.push_back(funcResult); // Put the sum in the output vector
+
+                    return true;
+                }
+
+                bool RPCSServiceProvider::VerifyUpdate(const std::vector<uint8_t> &input, std::vector<uint8_t> &output) 
+                {
+                    std::cout << "\nVerifyUpdate is called\n";
+
+                    bool funcResult = VerifyUpdateImp(input);
+
+                    output.push_back(funcResult); // Put the sum in the output vector
+
+                    return true;
+                }
+                
+                bool RPCSServiceProvider::PrepareRollback(const std::vector<uint8_t> &input, std::vector<uint8_t> &output) 
+                {
+                    std::cout << "\nPrepareRollback is called\n";
+
+                    bool funcResult = PrepareRollbackImp(input);
+
+                    output.push_back(funcResult); // Put the sum in the output vector
+
+                    return true;
+                }
+                
+                bool RPCSServiceProvider::StopUpdateSession(const std::vector<uint8_t> &input, std::vector<uint8_t> &output)
+                {
+                    StopUpdateSessionImp();
+                    return false;
+                }
+
+                bool RPCSServiceProvider::ResetMachine(const std::vector<uint8_t> &input, std::vector<uint8_t> &output)
+                {
+                    ResetMachineImp();
+                    return false;
+                }
+
+                /**************************** deconstructor  ************************/
+                RPCSServiceProvider::~RPCSServiceProvider()
                 {
                     mPoller->TryRemoveSender(&mUdpSocket);
                     mPoller->TryRemoveReceiver(&mUdpSocket);

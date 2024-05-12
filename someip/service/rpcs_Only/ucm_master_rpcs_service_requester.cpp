@@ -1,4 +1,4 @@
-#include "requester.h"
+#include "ucm_master_rpcs_service_requester.h"
 
 namespace ara
 {
@@ -8,10 +8,42 @@ namespace ara
         {
             namespace sd
             {
-                const std::string Requester::cAnyIpAddress("0.0.0.0");
-                //using HandlerTypeyyyyyy = std::function<void(const rpc::SomeIpRpcMessage &)>;
+                /******************* constants *************/
+                const uint16_t  cRequestUpdateSessionMethodID  = 4001;
+                const uint16_t  cAcvtivateMethodID = 4002;
+                const uint16_t  cFinishMethodID = 4003;
+                const uint16_t  cGetIdMethodID = 4004;
+                const uint16_t  cGetSwClusterChangeInfoMethodID = 4005;
+                const uint16_t  cGetSwPackagesMethodID = 4006;
+                const uint16_t  cGetSwClusterInfoMethodID = 4007;
+                const uint16_t  cRevertProcessedSwPackagesMethodID = 4008;
+                const uint16_t  cRollbackMethodID = 4009;
 
-#if(EXAMPLE == RPCS)
+
+
+                const uint16_t  cPrepareUpdateMethodID  = 4010;
+                const uint16_t  cVerifyUpdateMethodID  = 4011;
+                const uint16_t  cPrepareRollbackMethodID  = 4012;
+
+                const uint16_t  cCancelMethodID  = 4013;
+                const uint16_t  cDeleteTransferMethodID  = 4014;
+                const uint16_t  cGetHistoryMethodID  = 4015;
+                const uint16_t  cGetSwClusterManifestInfoMethodID  = 4016;
+                const uint16_t  cGetSwProcessProgressMethodID  = 4017;
+                const uint16_t  cProcessSwPackageMethodID  = 4018;
+                const uint16_t  cTransferDataMethodID  = 4019;
+                const uint16_t  cTransferExitMethodID  = 4020;
+                const uint16_t  cTransferStartMethodID  = 4021;
+
+
+
+
+                const uint16_t cStopUpdateSessionMethodID = 4022;
+                const uint16_t cResetMachineMethodID = 4023;                
+
+                const std::string UCM_Master_RPCSServiceRequester::cAnyIpAddress("0.0.0.0");
+
+                //using HandlerTypeyyyyyy = std::function<void(const rpc::SomeIpRpcMessage &)>;
                 /// @brief Invoke when server sent message
                 /// @param message response message
                 //void Requester::myHandle(const rpc::SomeIpRpcMessage &message) 
@@ -50,74 +82,156 @@ namespace ara
                 }
                 */
 
-                void Requester::sum(const std::vector<uint8_t> &payload)
-                {
-                    /*
-                    sumOverVector sumOverVector(rpcClient,mServiceId,1,cSumationOverVectorMethodId);
-                    sumOverVector(payload);
-                    */
-                    rpcClient->Request(mServiceId, cSumationOverVectorMethodId, mCounter, payload);
-                }
-                
-                void Requester::multiply(const std::vector<uint8_t> &payload)
-                {
-                    /*
-                    multiplicationOverVector multiplicationOverVector(rpcClient,mServiceId,1,cMultiplicationOverVectorMethodID);
-                    multiplicationOverVector(payload);
-                    */
-                    rpcClient->Request(mServiceId, cMultiplicationOverVectorMethodID, mCounter, payload);
-                }
-
-                std::future<bool> Requester::calculateSum(const std::vector<uint8_t> &payload,
-                                   std::vector<uint8_t> &data)
-                {
-                    /*
-                    getSum getSum(rpcClient,mServiceId,1,cGetSumMethodID);
-                    return getSum(payload, data);
-                    */
-                    return rpcClient->RequestWithoutHandler(mServiceId, cGetSumMethodID, mCounter, payload, data);
-                }       
-
-
-                std::future<bool> Requester::RequestUpdateSession(const std::vector<uint8_t> &payload,
+                    
+                std::future<bool> UCM_Master_RPCSServiceRequester::RequestUpdateSession(const std::vector<uint8_t> &payload,
                                    std::vector<uint8_t> &data)
                 {
                     return rpcClient->RequestWithoutHandler(mServiceId, cRequestUpdateSessionMethodID, mCounter, payload, data);
                 }  
 
-                std::future<bool> Requester::PrepareUpdate(const std::vector<uint8_t> &payload,
+                std::future<bool> UCM_Master_RPCSServiceRequester::Activate(const std::vector<uint8_t> &payload,
+                                   std::vector<uint8_t> &data)
+                {
+                    return rpcClient->RequestWithoutHandler(mServiceId, cAcvtivateMethodID, mCounter, payload, data);
+                }  
+
+                std::future<bool> UCM_Master_RPCSServiceRequester::Finish(const std::vector<uint8_t> &payload,
+                                   std::vector<uint8_t> &data)
+                {
+                    return rpcClient->RequestWithoutHandler(mServiceId, cFinishMethodID, mCounter, payload, data);
+                } 
+
+                std::future<bool> UCM_Master_RPCSServiceRequester::GetId(const std::vector<uint8_t> &payload,
+                                   std::vector<uint8_t> &data)
+                {
+                    return rpcClient->RequestWithoutHandler(mServiceId, cGetIdMethodID, mCounter, payload, data);
+                }   
+
+                std::future<bool> UCM_Master_RPCSServiceRequester::GetSwClusterChangeInfo(const std::vector<uint8_t> &payload,
+                                   std::vector<uint8_t> &data)
+                {
+                    return rpcClient->RequestWithoutHandler(mServiceId, cGetSwClusterChangeInfoMethodID, mCounter, payload, data);
+                } 
+
+                std::future<bool> UCM_Master_RPCSServiceRequester::GetSwPackages(const std::vector<uint8_t> &payload,
+                                   std::vector<uint8_t> &data)
+                {
+                    return rpcClient->RequestWithoutHandler(mServiceId, cGetSwPackagesMethodID, mCounter, payload, data);
+                } 
+
+                std::future<bool> UCM_Master_RPCSServiceRequester::GetSwClusterInfo(const std::vector<uint8_t> &payload,
+                                   std::vector<uint8_t> &data)
+                {
+                    return rpcClient->RequestWithoutHandler(mServiceId, cGetSwClusterInfoMethodID, mCounter, payload, data);
+                } 
+
+                std::future<bool> UCM_Master_RPCSServiceRequester::RevertProcessedSwPackages(const std::vector<uint8_t> &payload,
+                                   std::vector<uint8_t> &data)
+                {
+                    return rpcClient->RequestWithoutHandler(mServiceId, cRevertProcessedSwPackagesMethodID, mCounter, payload, data);
+                } 
+
+                std::future<bool> UCM_Master_RPCSServiceRequester::Rollback(const std::vector<uint8_t> &payload,
+                                   std::vector<uint8_t> &data)
+                {
+                    return rpcClient->RequestWithoutHandler(mServiceId, cRollbackMethodID, mCounter, payload, data);
+                } 
+
+
+
+
+
+
+
+
+                std::future<bool> UCM_Master_RPCSServiceRequester::PrepareUpdate(const std::vector<uint8_t> &payload,
                                    std::vector<uint8_t> &data)
                 {
                     return rpcClient->RequestWithoutHandler(mServiceId, cPrepareUpdateMethodID, mCounter, payload, data);
                 } 
 
-                std::future<bool> Requester::VerifyUpdate(const std::vector<uint8_t> &payload,
+                std::future<bool> UCM_Master_RPCSServiceRequester::VerifyUpdate(const std::vector<uint8_t> &payload,
                                    std::vector<uint8_t> &data)
                 {
                     return rpcClient->RequestWithoutHandler(mServiceId, cVerifyUpdateMethodID, mCounter, payload, data);
                 }  
 
-                std::future<bool> Requester::PrepareRollback(const std::vector<uint8_t> &payload,
+                std::future<bool> UCM_Master_RPCSServiceRequester::PrepareRollback(const std::vector<uint8_t> &payload,
                                    std::vector<uint8_t> &data)
                 {
                     return rpcClient->RequestWithoutHandler(mServiceId, cPrepareRollbackMethodID, mCounter, payload, data);
                 } 
             
+                
+                std::future<bool> UCM_Master_RPCSServiceRequester::cancel(const std::vector<uint8_t> &payload,
+                                   std::vector<uint8_t> &data)
+                {
+                    return rpcClient->RequestWithoutHandler(mServiceId, cCancelMethodID, mCounter, payload, data);
+                } 
 
-                void Requester::StopUpdateSession()
+                std::future<bool> UCM_Master_RPCSServiceRequester::DeleteTransfer(const std::vector<uint8_t> &payload,
+                                   std::vector<uint8_t> &data)
+                {
+                    return rpcClient->RequestWithoutHandler(mServiceId, cDeleteTransferMethodID, mCounter, payload, data);
+                } 
+
+                std::future<bool> UCM_Master_RPCSServiceRequester::GetHistory(const std::vector<uint8_t> &payload,
+                                   std::vector<uint8_t> &data)
+                {
+                    return rpcClient->RequestWithoutHandler(mServiceId, cGetHistoryMethodID, mCounter, payload, data);
+                } 
+
+                std::future<bool> UCM_Master_RPCSServiceRequester::GetSwClusterManifestInfo(const std::vector<uint8_t> &payload,
+                                   std::vector<uint8_t> &data)
+                {
+                    return rpcClient->RequestWithoutHandler(mServiceId, cGetSwClusterManifestInfoMethodID, mCounter, payload, data);
+                } 
+
+                std::future<bool> UCM_Master_RPCSServiceRequester::GetSwProcessProgress(const std::vector<uint8_t> &payload,
+                                   std::vector<uint8_t> &data)
+                {
+                    return rpcClient->RequestWithoutHandler(mServiceId, cGetSwProcessProgressMethodID, mCounter, payload, data);
+                } 
+
+                std::future<bool> UCM_Master_RPCSServiceRequester::ProcessSwPackage(const std::vector<uint8_t> &payload,
+                                   std::vector<uint8_t> &data)
+                {
+                    return rpcClient->RequestWithoutHandler(mServiceId, cProcessSwPackageMethodID, mCounter, payload, data);
+                } 
+
+                std::future<bool> UCM_Master_RPCSServiceRequester::TransferData(const std::vector<uint8_t> &payload,
+                                   std::vector<uint8_t> &data)
+                {
+                    return rpcClient->RequestWithoutHandler(mServiceId, cTransferDataMethodID, mCounter, payload, data);
+                } 
+
+                std::future<bool> UCM_Master_RPCSServiceRequester::TransferExit(const std::vector<uint8_t> &payload,
+                                   std::vector<uint8_t> &data)
+                {
+                    return rpcClient->RequestWithoutHandler(mServiceId, cTransferExitMethodID, mCounter, payload, data);
+                } 
+
+                std::future<bool> UCM_Master_RPCSServiceRequester::TransferStart(const std::vector<uint8_t> &payload,
+                                   std::vector<uint8_t> &data)
+                {
+                    return rpcClient->RequestWithoutHandler(mServiceId, cTransferStartMethodID, mCounter, payload, data);
+                } 
+
+
+
+                void UCM_Master_RPCSServiceRequester::StopUpdateSession()
                 {
                     std::vector<uint8_t> payload;
                     rpcClient->RequestWithoutResponse(mServiceId, cStopUpdateSessionMethodID, mCounter, payload);
                 }    
 
-                void Requester::ResetMachine()
+                void UCM_Master_RPCSServiceRequester::ResetMachine()
                 {
                     std::vector<uint8_t> payload;
                     rpcClient->RequestWithoutResponse(mServiceId, cResetMachineMethodID, mCounter, payload);
                 }     
-#endif
                 
-                bool Requester::init(uint16_t &_port)
+                bool UCM_Master_RPCSServiceRequester::init(uint16_t &_port)
                 {
                     std::string ip;
                     uint16_t port;
@@ -128,7 +242,7 @@ namespace ara
                         return false;
                     
                     std::cout << "service discovery sends ip address and port nuumber\n";
-#if(EXAMPLE == RPCS)
+
                     rpcClient = new rpc::SocketRpcClient(mPoller,
                                                     ip,
                                                     port,
@@ -152,22 +266,7 @@ namespace ara
                                                 myHandle(message);
                                             }
                                         );
-                    */
-
-#elif(EXAMPLE == PUBSUB)
-                    eventClient = new SockeKEventClient( mServiceId,
-                                                         mInstanceId,
-                                                         mMajorVersion,
-                                                         mMinorVersion,
-                                                         mEventgroupId,
-                                                         mCounter,
-                                                         mPoller,
-                                                         cNicIpAddress,
-                                                         cMulticastGroup,
-                                                         port+1000,
-                                                         mProtocolVersion);
-#endif
-                    
+                    */                  
                     return _result;
                 }
                 
@@ -175,7 +274,7 @@ namespace ara
 
                 /******************************* constructors  ******************************/
 
-                Requester::Requester(
+                UCM_Master_RPCSServiceRequester::UCM_Master_RPCSServiceRequester(
                     uint16_t serviceId,
                     uint16_t instanceId,
                     uint8_t majorVersion,
@@ -214,14 +313,14 @@ namespace ara
                         throw std::runtime_error("UDP socket setup failed.");
                     }
 
-                    auto _receiver{std::bind(&Requester::onReceive, this)};
+                    auto _receiver{std::bind(&UCM_Master_RPCSServiceRequester::onReceive, this)};
                     _successful = mPoller->TryAddReceiver(&mUdpSocket, _receiver);
                     if (!_successful)
                     {
                         throw std::runtime_error("Adding UDP socket receiver failed.");
                     }
 
-                    auto _sender{std::bind(&Requester::onSend, this)};
+                    auto _sender{std::bind(&UCM_Master_RPCSServiceRequester::onSend, this)};
                     _successful = mPoller->TryAddSender(&mUdpSocket, _sender);
                     if (!_successful)
                     {
@@ -232,7 +331,7 @@ namespace ara
 
                 /******************************* fundemental functions *********************/
                 
-                void Requester::InvokeOfferingHandler(sd::SomeIpSdMessage &&message)
+                void UCM_Master_RPCSServiceRequester::InvokeOfferingHandler(sd::SomeIpSdMessage &&message)
                 {
                     for (auto &entry : message.Entries())
                     {
@@ -263,7 +362,7 @@ namespace ara
                 }
                 
 
-                bool Requester::findService()
+                bool UCM_Master_RPCSServiceRequester::findService()
                 {
                     // create SOMEIP/SD message
                     SomeIpSdMessage mFindServieMessage;
@@ -290,7 +389,7 @@ namespace ara
                     return _result;
                 }
 
-                bool Requester::tryExtractOfferedEndpoint(
+                bool UCM_Master_RPCSServiceRequester::tryExtractOfferedEndpoint(
                     const SomeIpSdMessage &message,
                     std::string &ipAddress, uint16_t &port) const
                 {
@@ -324,7 +423,7 @@ namespace ara
                 }
 
 
-                bool Requester::TryGetTransportInfo(int duration, std::string &ipAddress,uint16_t &port)
+                bool UCM_Master_RPCSServiceRequester::TryGetTransportInfo(int duration, std::string &ipAddress,uint16_t &port)
                 {
                     bool _result;
 
@@ -359,7 +458,7 @@ namespace ara
                     return _result;
                 }
 
-                bool Requester::TryGetTransportInfo(std::string &ipAddress,uint16_t &port)
+                bool UCM_Master_RPCSServiceRequester::TryGetTransportInfo(std::string &ipAddress,uint16_t &port)
                 {
                     bool _result;
 
@@ -395,7 +494,7 @@ namespace ara
                     return _result;
                 }
 
-                bool Requester::findService(uint16_t &_port)
+                bool UCM_Master_RPCSServiceRequester::findService(uint16_t &_port)
                 {
                     // create SOMEIP/SD message
                     SomeIpSdMessage mFindServieMessage;
@@ -422,8 +521,7 @@ namespace ara
                 }
 
                 /**************************** poller functions  **********************************/
-
-                void Requester::onReceive()
+                void UCM_Master_RPCSServiceRequester::onReceive()
                 {
                     // define array to receive serialized SOMEIP/SD message
                     std::array<uint8_t, cBufferSize> _buffer;
@@ -448,7 +546,7 @@ namespace ara
                     }
                 }
 
-                void Requester::onSend()
+                void UCM_Master_RPCSServiceRequester::onSend()
                 {
                     while (!mSendingQueue.Empty())
                     {
@@ -475,22 +573,21 @@ namespace ara
                     }
                 }
 
-                void Requester::Send(const SomeIpSdMessage &message)
+                void UCM_Master_RPCSServiceRequester::Send(const SomeIpSdMessage &message)
                 {
                     std::vector<uint8_t> _payload{message.Payload()};
                     mSendingQueue.TryEnqueue(std::move(_payload));
                 }
 
 
-                AsyncBsdSocketLib::Poller* Requester::getPoller()
+                AsyncBsdSocketLib::Poller* UCM_Master_RPCSServiceRequester::getPoller()
                 {
                     return mPoller;
                 }
 
 
                 /**************************** deconstructor  ************************/
-
-                Requester::~Requester()
+                UCM_Master_RPCSServiceRequester::~UCM_Master_RPCSServiceRequester()
                 {
                     // Condition variable notifications are not valid anymore during destruction.
                     mValidNotify = false;

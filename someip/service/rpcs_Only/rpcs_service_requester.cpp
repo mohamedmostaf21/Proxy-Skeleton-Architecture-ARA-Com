@@ -1,4 +1,4 @@
-#include "requester.h"
+#include "rpcs_service_requester.h"
 
 namespace ara
 {
@@ -8,10 +8,19 @@ namespace ara
         {
             namespace sd
             {
-                const std::string Requester::cAnyIpAddress("0.0.0.0");
-                //using HandlerTypeyyyyyy = std::function<void(const rpc::SomeIpRpcMessage &)>;
+                /******************* constants *************/
+                const uint16_t  cRequestUpdateSessionMethodID  = 4001;
+                
+                const uint16_t  cPrepareUpdateMethodID  = 4002;
+                const uint16_t  cVerifyUpdateMethodID  = 4003;
+                const uint16_t  cPrepareRollbackMethodID  = 4004;
 
-#if(EXAMPLE == RPCS)
+                const uint16_t cStopUpdateSessionMethodID = 4005;
+                const uint16_t cResetMachineMethodID = 4006;                   
+
+                const std::string RPCSServiceRequester::cAnyIpAddress("0.0.0.0");
+
+                //using HandlerTypeyyyyyy = std::function<void(const rpc::SomeIpRpcMessage &)>;
                 /// @brief Invoke when server sent message
                 /// @param message response message
                 //void Requester::myHandle(const rpc::SomeIpRpcMessage &message) 
@@ -50,74 +59,44 @@ namespace ara
                 }
                 */
 
-                void Requester::sum(const std::vector<uint8_t> &payload)
-                {
-                    /*
-                    sumOverVector sumOverVector(rpcClient,mServiceId,1,cSumationOverVectorMethodId);
-                    sumOverVector(payload);
-                    */
-                    rpcClient->Request(mServiceId, cSumationOverVectorMethodId, mCounter, payload);
-                }
-                
-                void Requester::multiply(const std::vector<uint8_t> &payload)
-                {
-                    /*
-                    multiplicationOverVector multiplicationOverVector(rpcClient,mServiceId,1,cMultiplicationOverVectorMethodID);
-                    multiplicationOverVector(payload);
-                    */
-                    rpcClient->Request(mServiceId, cMultiplicationOverVectorMethodID, mCounter, payload);
-                }
-
-                std::future<bool> Requester::calculateSum(const std::vector<uint8_t> &payload,
-                                   std::vector<uint8_t> &data)
-                {
-                    /*
-                    getSum getSum(rpcClient,mServiceId,1,cGetSumMethodID);
-                    return getSum(payload, data);
-                    */
-                    return rpcClient->RequestWithoutHandler(mServiceId, cGetSumMethodID, mCounter, payload, data);
-                }       
-
-
-                std::future<bool> Requester::RequestUpdateSession(const std::vector<uint8_t> &payload,
+                    
+                std::future<bool> RPCSServiceRequester::RequestUpdateSession(const std::vector<uint8_t> &payload,
                                    std::vector<uint8_t> &data)
                 {
                     return rpcClient->RequestWithoutHandler(mServiceId, cRequestUpdateSessionMethodID, mCounter, payload, data);
                 }  
 
-                std::future<bool> Requester::PrepareUpdate(const std::vector<uint8_t> &payload,
+                std::future<bool> RPCSServiceRequester::PrepareUpdate(const std::vector<uint8_t> &payload,
                                    std::vector<uint8_t> &data)
                 {
                     return rpcClient->RequestWithoutHandler(mServiceId, cPrepareUpdateMethodID, mCounter, payload, data);
                 } 
 
-                std::future<bool> Requester::VerifyUpdate(const std::vector<uint8_t> &payload,
+                std::future<bool> RPCSServiceRequester::VerifyUpdate(const std::vector<uint8_t> &payload,
                                    std::vector<uint8_t> &data)
                 {
                     return rpcClient->RequestWithoutHandler(mServiceId, cVerifyUpdateMethodID, mCounter, payload, data);
                 }  
 
-                std::future<bool> Requester::PrepareRollback(const std::vector<uint8_t> &payload,
+                std::future<bool> RPCSServiceRequester::PrepareRollback(const std::vector<uint8_t> &payload,
                                    std::vector<uint8_t> &data)
                 {
                     return rpcClient->RequestWithoutHandler(mServiceId, cPrepareRollbackMethodID, mCounter, payload, data);
                 } 
             
-
-                void Requester::StopUpdateSession()
+                void RPCSServiceRequester::StopUpdateSession()
                 {
                     std::vector<uint8_t> payload;
                     rpcClient->RequestWithoutResponse(mServiceId, cStopUpdateSessionMethodID, mCounter, payload);
                 }    
 
-                void Requester::ResetMachine()
+                void RPCSServiceRequester::ResetMachine()
                 {
                     std::vector<uint8_t> payload;
                     rpcClient->RequestWithoutResponse(mServiceId, cResetMachineMethodID, mCounter, payload);
                 }     
-#endif
                 
-                bool Requester::init(uint16_t &_port)
+                bool RPCSServiceRequester::init(uint16_t &_port)
                 {
                     std::string ip;
                     uint16_t port;
@@ -128,7 +107,7 @@ namespace ara
                         return false;
                     
                     std::cout << "service discovery sends ip address and port nuumber\n";
-#if(EXAMPLE == RPCS)
+
                     rpcClient = new rpc::SocketRpcClient(mPoller,
                                                     ip,
                                                     port,
@@ -152,22 +131,7 @@ namespace ara
                                                 myHandle(message);
                                             }
                                         );
-                    */
-
-#elif(EXAMPLE == PUBSUB)
-                    eventClient = new SockeKEventClient( mServiceId,
-                                                         mInstanceId,
-                                                         mMajorVersion,
-                                                         mMinorVersion,
-                                                         mEventgroupId,
-                                                         mCounter,
-                                                         mPoller,
-                                                         cNicIpAddress,
-                                                         cMulticastGroup,
-                                                         port+1000,
-                                                         mProtocolVersion);
-#endif
-                    
+                    */                  
                     return _result;
                 }
                 
@@ -175,7 +139,7 @@ namespace ara
 
                 /******************************* constructors  ******************************/
 
-                Requester::Requester(
+                RPCSServiceRequester::RPCSServiceRequester(
                     uint16_t serviceId,
                     uint16_t instanceId,
                     uint8_t majorVersion,
@@ -214,14 +178,14 @@ namespace ara
                         throw std::runtime_error("UDP socket setup failed.");
                     }
 
-                    auto _receiver{std::bind(&Requester::onReceive, this)};
+                    auto _receiver{std::bind(&RPCSServiceRequester::onReceive, this)};
                     _successful = mPoller->TryAddReceiver(&mUdpSocket, _receiver);
                     if (!_successful)
                     {
                         throw std::runtime_error("Adding UDP socket receiver failed.");
                     }
 
-                    auto _sender{std::bind(&Requester::onSend, this)};
+                    auto _sender{std::bind(&RPCSServiceRequester::onSend, this)};
                     _successful = mPoller->TryAddSender(&mUdpSocket, _sender);
                     if (!_successful)
                     {
@@ -232,7 +196,7 @@ namespace ara
 
                 /******************************* fundemental functions *********************/
                 
-                void Requester::InvokeOfferingHandler(sd::SomeIpSdMessage &&message)
+                void RPCSServiceRequester::InvokeOfferingHandler(sd::SomeIpSdMessage &&message)
                 {
                     for (auto &entry : message.Entries())
                     {
@@ -263,7 +227,7 @@ namespace ara
                 }
                 
 
-                bool Requester::findService()
+                bool RPCSServiceRequester::findService()
                 {
                     // create SOMEIP/SD message
                     SomeIpSdMessage mFindServieMessage;
@@ -290,7 +254,7 @@ namespace ara
                     return _result;
                 }
 
-                bool Requester::tryExtractOfferedEndpoint(
+                bool RPCSServiceRequester::tryExtractOfferedEndpoint(
                     const SomeIpSdMessage &message,
                     std::string &ipAddress, uint16_t &port) const
                 {
@@ -324,7 +288,7 @@ namespace ara
                 }
 
 
-                bool Requester::TryGetTransportInfo(int duration, std::string &ipAddress,uint16_t &port)
+                bool RPCSServiceRequester::TryGetTransportInfo(int duration, std::string &ipAddress,uint16_t &port)
                 {
                     bool _result;
 
@@ -359,7 +323,7 @@ namespace ara
                     return _result;
                 }
 
-                bool Requester::TryGetTransportInfo(std::string &ipAddress,uint16_t &port)
+                bool RPCSServiceRequester::TryGetTransportInfo(std::string &ipAddress,uint16_t &port)
                 {
                     bool _result;
 
@@ -395,7 +359,7 @@ namespace ara
                     return _result;
                 }
 
-                bool Requester::findService(uint16_t &_port)
+                bool RPCSServiceRequester::findService(uint16_t &_port)
                 {
                     // create SOMEIP/SD message
                     SomeIpSdMessage mFindServieMessage;
@@ -422,8 +386,7 @@ namespace ara
                 }
 
                 /**************************** poller functions  **********************************/
-
-                void Requester::onReceive()
+                void RPCSServiceRequester::onReceive()
                 {
                     // define array to receive serialized SOMEIP/SD message
                     std::array<uint8_t, cBufferSize> _buffer;
@@ -448,7 +411,7 @@ namespace ara
                     }
                 }
 
-                void Requester::onSend()
+                void RPCSServiceRequester::onSend()
                 {
                     while (!mSendingQueue.Empty())
                     {
@@ -475,22 +438,21 @@ namespace ara
                     }
                 }
 
-                void Requester::Send(const SomeIpSdMessage &message)
+                void RPCSServiceRequester::Send(const SomeIpSdMessage &message)
                 {
                     std::vector<uint8_t> _payload{message.Payload()};
                     mSendingQueue.TryEnqueue(std::move(_payload));
                 }
 
 
-                AsyncBsdSocketLib::Poller* Requester::getPoller()
+                AsyncBsdSocketLib::Poller* RPCSServiceRequester::getPoller()
                 {
                     return mPoller;
                 }
 
 
                 /**************************** deconstructor  ************************/
-
-                Requester::~Requester()
+                RPCSServiceRequester::~RPCSServiceRequester()
                 {
                     // Condition variable notifications are not valid anymore during destruction.
                     mValidNotify = false;

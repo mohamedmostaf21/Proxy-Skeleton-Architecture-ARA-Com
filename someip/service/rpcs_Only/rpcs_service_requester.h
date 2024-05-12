@@ -1,5 +1,5 @@
-#ifndef REQUESTER_H
-#define REQUESTER_H
+#ifndef REQUESTER_RPCS_H
+#define REQUESTER_RPCS_H
 
 #include "../../../sockets/include/poller.h"
 #include "../../../sockets/include/udp_client.h"
@@ -16,7 +16,6 @@
 #include <iostream>
 #include <algorithm>
 //#include "methods.h"
-#include "../../../config.h"
 
 namespace ara
 {
@@ -28,36 +27,12 @@ namespace ara
             /// @note The namespace is not part of the ARA standard.
             namespace sd
             {
-
-#if(EXAMPLE == RPCS)
-                    const uint16_t cSumationOverVectorMethodId = 1000;
-                    const uint16_t cMultiplicationOverVectorMethodID = 2000;
-                    const uint16_t cGetSumMethodID = 3000;
-
-                    const uint16_t  cRequestUpdateSessionMethodID  = 4001;
-                    
-                    const uint16_t  cPrepareUpdateMethodID  = 4002;
-                    const uint16_t  cVerifyUpdateMethodID  = 4003;
-                    const uint16_t  cPrepareRollbackMethodID  = 4004;
-
-                    const uint16_t cStopUpdateSessionMethodID = 4005;
-                    const uint16_t cResetMachineMethodID = 4006;                   
-#elif(EXAMPLE == PUBSUB)
-
-#endif
-                class Requester
+                class RPCSServiceRequester
                 {
                 public: 
+                    /******************************* attributes ******************************/
+                    rpc::SocketRpcClient *rpcClient;       
 
-#if(EXAMPLE == RPCS)
-
-                    rpc::SocketRpcClient *rpcClient;
-
-#elif(EXAMPLE == PUBSUB)
-                    
-                    SockeKEventClient *eventClient;
-#endif
-                
                 private: 
                     /******************************* attributes ******************************/
                     uint16_t mServiceId;
@@ -109,17 +84,13 @@ namespace ara
                     static const std::string cAnyIpAddress;
                     
 
-
                     /********************** poller functions  *********************/
-
                     void onReceive();
                     void onSend();
                     void Send(const SomeIpSdMessage &message);
 
 
-
                     /******************************* internal functions *********************/
-
                     /** function take any someip/sd message **/
                     //void InvokeEventHandler(SomeIpSdMessage &&message);
 
@@ -136,8 +107,7 @@ namespace ara
 
                 public:
                     /******************* constructor  *******************************/
-
-                    Requester(
+                    RPCSServiceRequester(
                         uint16_t serviceId,
                         uint16_t instanceId,
                         uint8_t majorVersion,
@@ -152,7 +122,6 @@ namespace ara
 
 
                     /******************************* fundemental functions *********************/
-
                     bool TryGetTransportInfo(int duration, std::string &ipAddress,uint16_t &port);
 
                     bool TryGetTransportInfo(std::string &ipAddress,uint16_t &port);
@@ -163,41 +132,22 @@ namespace ara
 
 
                     /************************** getter  ***************************/
-
                     AsyncBsdSocketLib::Poller* getPoller();
 
 
                     /********************** rpc methods  ***************************/
-
-            
-                    void sum(const std::vector<uint8_t> &payload);
-
-                    void multiply(const std::vector<uint8_t> &payload);
-                    
-                    std::future<bool> calculateSum(const std::vector<uint8_t> &payload,
-                                   std::vector<uint8_t> &data);
-
-         
                     std::future<bool> RequestUpdateSession(const std::vector<uint8_t> &payload,
                                    std::vector<uint8_t> &data);
 
-
-                    std::future<bool> PrepareUpdate(const std::vector<uint8_t> &payload,
-                                   std::vector<uint8_t> &data);
-
-                    std::future<bool> VerifyUpdate(const std::vector<uint8_t> &payload,
-                                   std::vector<uint8_t> &data);
-
-                    std::future<bool> PrepareRollback(const std::vector<uint8_t> &payload,
-                    std::vector<uint8_t> &data);
-                   
-
-                    
+                    std::future<bool> PrepareUpdate(const std::vector<uint8_t> &payload, std::vector<uint8_t> &data);
+                    std::future<bool> VerifyUpdate(const std::vector<uint8_t> &payload, std::vector<uint8_t> &data);
+                    std::future<bool> PrepareRollback(const std::vector<uint8_t> &payload, std::vector<uint8_t> &data);
+                                    
                     void StopUpdateSession();
                     void ResetMachine();
 
                     /*************************  deconstructor  *********************/
-                    ~Requester();
+                    ~RPCSServiceRequester();
                 };
             }
         }

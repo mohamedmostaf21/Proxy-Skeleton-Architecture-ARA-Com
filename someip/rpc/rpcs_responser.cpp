@@ -21,7 +21,8 @@ namespace ara
 
                 SomeIpReturnCode RpcsResponser::validate(const SomeIpRpcMessage &request) const
                 {
-                    if (request.MessageType() != SomeIpMessageType::Request)
+                    if (!((request.MessageType() == SomeIpMessageType::Request)
+                    ||(request.MessageType() == SomeIpMessageType::RequestNoReturn)))
                     {
                         std::cout << "message type is not request\n";
                         return SomeIpReturnCode::eWrongMessageType;
@@ -105,6 +106,8 @@ namespace ara
                         - fill responsePayload with response message with result of requested method
                 */
 
+                // true means send responsePayload (serialization of response message)
+                // false means not thing
                 bool RpcsResponser::TryInvokeHandler(
                     const std::vector<uint8_t> &requestPayload,
                     std::vector<uint8_t> &responsePayload) const
@@ -137,6 +140,10 @@ namespace ara
                                                     _rpcResponsePdu,
                                                     responsePayload
                                                   );  
+                            }
+                            else if(!_handled && _request.MessageType() == SomeIpMessageType::RequestNoReturn)
+                            {
+                                return false;
                             }
                             else
                             {
